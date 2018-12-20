@@ -34,7 +34,7 @@ import javax.crypto.Cipher;
  * </p>
  * 
  */
-public class RSAUtils {
+public class RSAUtil {
 
     /** 
      * 加密算法RSA
