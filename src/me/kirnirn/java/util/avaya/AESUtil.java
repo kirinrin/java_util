@@ -1,4 +1,4 @@
-package me.kirnirn.java.util;
+package me.kirnirn.java.util.avaya;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
