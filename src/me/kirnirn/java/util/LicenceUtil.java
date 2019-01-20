@@ -397,9 +397,9 @@ public class LicenceUtil {
 //						}
 //					}
 //				}
-				return true;
+				return result;
 			} catch (Exception e) {
-
+				System.out.println(e);
 			}
 			return false;
 		}
