@@ -39,6 +39,7 @@ public class KiDateTimeHelper {
 
 	/**
 	 * 计算时间差（秒），如果某个参数=0， 返回 0
+	 * 针对精度问题，舍去秒后的精度进行计算
 	 * 
 	 * @param start
 	 * @param end
@@ -48,24 +49,25 @@ public class KiDateTimeHelper {
 		if (start == null || end == null) {
 			return 0L;
 		} else {
-			return Duration.between(start, end).getSeconds();
+			return Duration.between(start.withNano(0), end.withNano(0)).getSeconds();
 		}
 	}
 
 	/**
 	 * 计算时间差（秒），如果某个参数=0， 返回 0, 三个比较，使用后两个中的前面的一个。
-	 * 
+	 * * 针对精度问题，舍去秒后的精度进行计算 
 	 * @param start
 	 * @param end
 	 * @return
 	 */
 	public static Long durationBySecond(LocalDateTime start, LocalDateTime mid, LocalDateTime end) {
+		
 		if (start == null || (mid == null && end == null)) {
 			return 0L;
 		} else if (mid == null) {
-			return Duration.between(start, end).getSeconds();
+			return Duration.between(start.withNano(0), end.withNano(0)).getSeconds();
 		} else if (end == null) {
-			return Duration.between(start, mid).getSeconds();
+			return Duration.between(start.withNano(0), mid.withNano(0)).getSeconds();
 		} else {
 			return 0L;
 		}
