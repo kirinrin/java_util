@@ -10,8 +10,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Base64;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -20,6 +18,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,7 +61,8 @@ public class AESUtil {
 			// 这里用Base64Encoder中会找不到包
 			// 解决办法：
 			// 在项目的Build path中先移除JRE System Library，再添加库JRE System Library，重新编译后就一切正常了。
-			String AES_encode = Base64.getEncoder().encodeToString(byte_AES);
+			Base64 base = new Base64();
+			String AES_encode = base.encodeAsString(byte_AES);
 
 			// 11.将字符串返回
 			return AES_encode;
@@ -111,7 +112,8 @@ public class AESUtil {
 			// 7.初始化密码器，第一个参数为加密(Encrypt_mode)或者解密(Decrypt_mode)操作，第二个参数为使用的KEY
 			cipher.init(Cipher.DECRYPT_MODE, key);
 			// 8.将加密并编码后的内容解码成字节数组
-			byte[] byte_content = Base64.getDecoder().decode(content.getBytes());
+			Base64 base = new Base64();
+			byte[] byte_content = base.decode(content.getBytes("utf-8"));
 
 			/*
 			 * 解密
@@ -151,48 +153,45 @@ public class AESUtil {
 	 * //加密 var encrypted =
 	 * CryptoJS.AES.encrypt(data,key,{iv:iv,mode:CryptoJS.mode.CBC,padding:CryptoJS.pad.ZeroPadding});
 	 * 
-	 * document.write(encrypted.ciphertext); 
-	 * document.write('<br/>); 
-	 * document.write(encrypted.key); 
-	 * document.write('<br/>'); 
-	 * document.write(encrypted.iv); 
-	 * document.write('<br/>); 
-	 * document.write(encrypted.salt); 
-	 * document.write('<br/>'); 
-	 * document.write(encrypted); 
-	 * document.write('<br/>');
+	 * document.write(encrypted.ciphertext); document.write('<br/>
+	 * ); document.write(encrypted.key); document.write('<br/>
+	 * '); document.write(encrypted.iv); document.write('<br/>
+	 * ); document.write(encrypted.salt); document.write('<br/>
+	 * '); document.write(encrypted); document.write('<br/>
+	 * ');
 	 * 
 	 * 
 	 * //解密 var decrypted =
 	 * CryptoJS.AES.decrypt(encrypted,key,{iv:iv,padding:CryptoJS.pad.ZeroPadding});
 	 * console.log(decrypted.toString(CryptoJS.enc.Utf8)); </script>
 	 * 
-	//https://my.oschina.net/Jacker/blog/86383
+	 * //https://my.oschina.net/Jacker/blog/86383
+	 * 
 	 * @return
 	 */
 	public static String AESEncodeCommon() {
 		return null;
 	}
-	
+
 	/**
 	 * 
-	 * var text = "The quick brown fox jumps over the lazy dog. 👻 👻";
-     * var secret = "René Über";
-     * var encrypted = CryptoJS.AES.encrypt(text, secret);
-     * encrypted = encrypted.toString();
-     * console.log("Cipher text: " + encrypted);
-     * 
-     * out = U2FsdGVkX1+tsmZvCEFa/iGeSA0K7gvgs9KXeZKwbCDNCs2zPo+BXjvKYLrJutMK+hxTwl/hyaQLOaD7LLIRo2I5fyeRMPnroo6k8N9uwKk=
-     * 
+	 * var text = "The quick brown fox jumps over the lazy dog. 👻 👻"; var secret =
+	 * "René Über"; var encrypted = CryptoJS.AES.encrypt(text, secret); encrypted =
+	 * encrypted.toString(); console.log("Cipher text: " + encrypted);
+	 * 
+	 * out =
+	 * U2FsdGVkX1+tsmZvCEFa/iGeSA0K7gvgs9KXeZKwbCDNCs2zPo+BXjvKYLrJutMK+hxTwl/hyaQLOaD7LLIRo2I5fyeRMPnroo6k8N9uwKk=
+	 * 
 	 * @param secret
 	 * @param cipherText
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 * @throws Exception
 	 */
-	public static String AESDecodeCryptoJS(String secret, String cipherText) throws Exception  {
-		
-		byte[] cipherData = Base64.getDecoder().decode(cipherText);
+	public static String AESDecodeCryptoJS(String secret, String cipherText) throws Exception {
+
+		Base64 base = new Base64();
+		byte[] cipherData = base.decode(cipherText);
 		byte[] saltData = Arrays.copyOfRange(cipherData, 8, 16);
 
 		MessageDigest md5 = null;
@@ -228,70 +227,100 @@ public class AESUtil {
 			throw e;
 		}
 		String decryptedText = new String(decryptedData, StandardCharsets.UTF_8);
-
+		log.info("解密文本 cipherText={}, decode={}", decryptedText);
 		return decryptedText;
 	}
-	
-	
+
+	public static String AESDecodeCryptoJS2(String secret, String cipherText) throws Exception {
+
+		Base64 base = new Base64();
+		byte[] cipherData = base.decode(cipherText);
+		byte[] saltData = Arrays.copyOfRange(cipherData, 8, 16);
+
+		MessageDigest md5 = MessageDigest.getInstance("MD5");
+		final byte[][] keyAndIV = GenerateKeyAndIV(32, 16, 1, saltData, secret.getBytes(StandardCharsets.UTF_8), md5);
+		SecretKeySpec key = new SecretKeySpec(keyAndIV[0], "AES");
+		IvParameterSpec iv = new IvParameterSpec(keyAndIV[1]);
+
+		byte[] encrypted = Arrays.copyOfRange(cipherData, 16, cipherData.length);
+		Cipher aesCBC = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		aesCBC.init(Cipher.DECRYPT_MODE, key, iv);
+		byte[] decryptedData = aesCBC.doFinal(encrypted);
+		String decryptedText = new String(decryptedData, StandardCharsets.UTF_8);
+
+		System.out.println(decryptedText);
+		return decryptedText;
+	}
+
 	/**
-	 * Generates a key and an initialization vector (IV) with the given salt and password.
+	 * Generates a key and an initialization vector (IV) with the given salt and
+	 * password.
 	 * <p>
-	 * This method is equivalent to OpenSSL's EVP_BytesToKey function
-	 * (see https://github.com/openssl/openssl/blob/master/crypto/evp/evp_key.c).
-	 * By default, OpenSSL uses a single iteration, MD5 as the algorithm and UTF-8 encoded password data.
+	 * This method is equivalent to OpenSSL's EVP_BytesToKey function (see
+	 * https://github.com/openssl/openssl/blob/master/crypto/evp/evp_key.c). By
+	 * default, OpenSSL uses a single iteration, MD5 as the algorithm and UTF-8
+	 * encoded password data.
 	 * </p>
-	 * @param keyLength the length of the generated key (in bytes)
-	 * @param ivLength the length of the generated IV (in bytes)
-	 * @param iterations the number of digestion rounds 
-	 * @param salt the salt data (8 bytes of data or <code>null</code>)
-	 * @param password the password data (optional)
-	 * @param md the message digest algorithm to use
+	 * 
+	 * @param keyLength
+	 *            the length of the generated key (in bytes)
+	 * @param ivLength
+	 *            the length of the generated IV (in bytes)
+	 * @param iterations
+	 *            the number of digestion rounds
+	 * @param salt
+	 *            the salt data (8 bytes of data or <code>null</code>)
+	 * @param password
+	 *            the password data (optional)
+	 * @param md
+	 *            the message digest algorithm to use
 	 * @return an two-element array with the generated key and IV
 	 */
-	public static byte[][] GenerateKeyAndIV(int keyLength, int ivLength, int iterations, byte[] salt, byte[] password, MessageDigest md) {
+	public static byte[][] GenerateKeyAndIV(int keyLength, int ivLength, int iterations, byte[] salt, byte[] password,
+			MessageDigest md) {
 
-	    int digestLength = md.getDigestLength();
-	    int requiredLength = (keyLength + ivLength + digestLength - 1) / digestLength * digestLength;
-	    byte[] generatedData = new byte[requiredLength];
-	    int generatedLength = 0;
+		int digestLength = md.getDigestLength();
+		int requiredLength = (keyLength + ivLength + digestLength - 1) / digestLength * digestLength;
+		byte[] generatedData = new byte[requiredLength];
+		int generatedLength = 0;
 
-	    try {
-	        md.reset();
+		try {
+			md.reset();
 
-	        // Repeat process until sufficient data has been generated
-	        while (generatedLength < keyLength + ivLength) {
+			// Repeat process until sufficient data has been generated
+			while (generatedLength < keyLength + ivLength) {
 
-	            // Digest data (last digest if available, password data, salt if available)
-	            if (generatedLength > 0)
-	                md.update(generatedData, generatedLength - digestLength, digestLength);
-	            md.update(password);
-	            if (salt != null)
-	                md.update(salt, 0, 8);
-	            md.digest(generatedData, generatedLength, digestLength);
+				// Digest data (last digest if available, password data, salt if available)
+				if (generatedLength > 0)
+					md.update(generatedData, generatedLength - digestLength, digestLength);
+				md.update(password);
+				if (salt != null)
+					md.update(salt, 0, 8);
+				md.digest(generatedData, generatedLength, digestLength);
 
-	            // additional rounds
-	            for (int i = 1; i < iterations; i++) {
-	                md.update(generatedData, generatedLength, digestLength);
-	                md.digest(generatedData, generatedLength, digestLength);
-	            }
+				// additional rounds
+				for (int i = 1; i < iterations; i++) {
+					md.update(generatedData, generatedLength, digestLength);
+					md.digest(generatedData, generatedLength, digestLength);
+				}
 
-	            generatedLength += digestLength;
-	        }
+				generatedLength += digestLength;
+			}
 
-	        // Copy key and IV into separate byte arrays
-	        byte[][] result = new byte[2][];
-	        result[0] = Arrays.copyOfRange(generatedData, 0, keyLength);
-	        if (ivLength > 0)
-	            result[1] = Arrays.copyOfRange(generatedData, keyLength, keyLength + ivLength);
+			// Copy key and IV into separate byte arrays
+			byte[][] result = new byte[2][];
+			result[0] = Arrays.copyOfRange(generatedData, 0, keyLength);
+			if (ivLength > 0)
+				result[1] = Arrays.copyOfRange(generatedData, keyLength, keyLength + ivLength);
 
-	        return result;
+			return result;
 
-	    } catch (DigestException e) {
-	        throw new RuntimeException(e);
+		} catch (DigestException e) {
+			throw new RuntimeException(e);
 
-	    } finally {
-	        // Clean out temporary data
-	        Arrays.fill(generatedData, (byte)0);
-	    }
+		} finally {
+			// Clean out temporary data
+			Arrays.fill(generatedData, (byte) 0);
+		}
 	}
 }
