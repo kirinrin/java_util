@@ -18,9 +18,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class RsaUtils{
 	
 	private static PrivateKey  privateKey = null;

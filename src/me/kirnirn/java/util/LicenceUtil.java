@@ -34,7 +34,7 @@ public class LicenceUtil {
 	/**
 	 * 公钥
 	 */
-	private static final String PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCnugMjCf8n8Z3UXri1PKTupUQGj6yihuiW/EBv1UbhSyhPmiCVul0xn4HXLZHKR0qPsUfoqlJH3cjPkxLb1mm89VF6SrWiIStybg0ydjSjwIMzBSugAI5QI6dBITRxc/1xU+tkjN0pkvthiBghYQEtwgEeezuj75C/Cz5L/WLULwIDAQAB";
+	 public static final String PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCnugMjCf8n8Z3UXri1PKTupUQGj6yihuiW/EBv1UbhSyhPmiCVul0xn4HXLZHKR0qPsUfoqlJH3cjPkxLb1mm89VF6SrWiIStybg0ydjSjwIMzBSugAI5QI6dBITRxc/1xU+tkjN0pkvthiBghYQEtwgEeezuj75C/Cz5L/WLULwIDAQAB";
 
 	/**
 	 * 获取windows序列号
