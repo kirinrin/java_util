@@ -18,6 +18,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.apache.tomcat.util.codec.binary.Base64;
+
 public class RsaUtils{
 	
 	private static PrivateKey  privateKey = null;
@@ -45,7 +47,8 @@ public class RsaUtils{
 	
 	public static void initPublicKey(String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		byte[] keyBytes;
-		keyBytes = org.apache.commons.codec.binary.Base64.decodeBase64(key);
+		
+		keyBytes = Base64.decodeBase64(key);
 		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
 		KeyFactory keyFactory = KeyFactory.getInstance(METHOD);
 		publicKey = keyFactory.generatePublic(keySpec);
@@ -53,7 +56,7 @@ public class RsaUtils{
 	
 	public static void initPrivateKey(String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		byte[] keyBytes;
-        keyBytes = org.apache.commons.codec.binary.Base64.decodeBase64(key);
+        keyBytes = Base64.decodeBase64(key);
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(METHOD);
         privateKey = keyFactory.generatePrivate(keySpec);
@@ -66,7 +69,7 @@ public class RsaUtils{
 		Cipher cipher = Cipher.getInstance(METHOD);
 		cipher.init(Cipher.ENCRYPT_MODE, privateKey, new SecureRandom());
 		byte[] cipherData = cipher.doFinal(painTesxt.getBytes());
-		String enData = org.apache.commons.codec.binary.Base64.encodeBase64String(cipherData);
+		String enData = Base64.encodeBase64String(cipherData);
 
 		return enData;
 	}
@@ -77,7 +80,7 @@ public class RsaUtils{
 		}
 		Cipher cipher = Cipher.getInstance(METHOD);
 		cipher.init(Cipher.DECRYPT_MODE, publicKey, new SecureRandom());
-		byte[] data = org.apache.commons.codec.binary.Base64.decodeBase64(encrptyData);
+		byte[] data = Base64.decodeBase64(encrptyData);
 		byte[] plainData = cipher.doFinal(data);
 		
 		return new String(plainData);
