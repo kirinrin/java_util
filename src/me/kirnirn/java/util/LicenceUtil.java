@@ -385,7 +385,6 @@ public class LicenceUtil {
 			try {
 				byte[] dataByte = this.getDataByte();
 				String signature = this.getSignature();
-
 				boolean result = RSAUtil.verify(dataByte, PUBLIC_KEY, ByteUtil.hex2byte(signature));
 //				result = result && this.productName.equals(productName) && this.version.equals(version);
 //				if (result) {
